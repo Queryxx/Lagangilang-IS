@@ -37,19 +37,32 @@ export function LoginForm() {
       return
     }
 
-    // Simulate login process
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
 
-      // For demo purposes - you would integrate with your auth system here
-      if (formData.email === "admin@municipality.gov" && formData.password === "admin123") {
-        alert("Login successful! Redirecting to dashboard...")
-        // In a real app, you would redirect to dashboard or set auth state
-      } else {
-        setError("Invalid email or password")
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed')
       }
-    } catch (err) {
-      setError("Login failed. Please try again.")
+
+      // Store user data in localStorage
+      localStorage.setItem('userLoggedIn', 'true')
+      localStorage.setItem('user', JSON.stringify({
+        ...data.user,
+        name: `${data.user.firstName} ${data.user.lastName}`
+      }))
+
+      // Redirect to dashboard
+      window.location.href = '/dashboard'
+    } catch (err: any) {
+      setError(err.message || 'Failed to login. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -87,7 +100,7 @@ export function LoginForm() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="your.email@municipality.gov"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleInputChange}
                 className="pl-10"
@@ -141,9 +154,7 @@ export function LoginForm() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">Demo credentials: admin@municipality.gov / admin123</p>
-        </div>
+
       </CardContent>
     </Card>
   )

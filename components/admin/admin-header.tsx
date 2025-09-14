@@ -9,15 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuPortal
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Bell, LogOut, User, Settings } from "lucide-react"
 
 export function AdminHeader() {
   const [adminUser, setAdminUser] = useState<any>(null)
-  const [open, setOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -46,8 +44,12 @@ export function AdminHeader() {
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <DropdownMenuTrigger>
+            <Button
+              variant="ghost"
+              className="relative h-8 w-8 rounded-full"
+              aria-label="Open admin menu"
+            >
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {adminUser?.name?.charAt(0) || "A"}

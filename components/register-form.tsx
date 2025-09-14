@@ -53,13 +53,30 @@ export function RegisterForm() {
       return
     }
 
-    // Simulate registration process
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      alert("Registration successful! Please check your email to verify your account.")
-      // In a real app, you would handle the registration process here
-    } catch (err) {
-      setError("Registration failed. Please try again.")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed')
+      }
+
+      // Redirect to login page after successful registration
+      window.location.href = '/login'
+    } catch (err: any) {
+      setError(err.message || 'Failed to register. Please try again.')
     } finally {
       setIsLoading(false)
     }

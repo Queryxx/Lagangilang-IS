@@ -21,9 +21,12 @@ export default function AdminLayout({
     const checkAuth = () => {
       const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true"
 
-      if (!isLoggedIn && pathname !== "/admin/login") {
+      const publicPages = ["/admin/login", "/admin/register", "/admin/forgot-password"]
+      const isPublicPage = pathname ? publicPages.includes(pathname) : false
+
+      if (!isLoggedIn && !isPublicPage) {
         router.push("/admin/login")
-      } else if (isLoggedIn && pathname === "/admin/login") {
+      } else if (isLoggedIn && isPublicPage) {
         router.push("/admin/dashboard")
       } else {
         setIsAuthenticated(isLoggedIn)
@@ -42,8 +45,8 @@ export default function AdminLayout({
     )
   }
 
-  // Show login page without sidebar
-  if (pathname === "/admin/login") {
+  // Show public pages without sidebar
+  if (pathname && ["/admin/login", "/admin/register", "/admin/forgot-password"].includes(pathname)) {
     return <>{children}</>
   }
 

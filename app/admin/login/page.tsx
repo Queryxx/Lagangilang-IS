@@ -24,23 +24,35 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     setError("")
 
-    // Simulate admin authentication
-    if (email === "admin@lagangilang.gov" && password === "admin123") {
-      localStorage.setItem("adminLoggedIn", "true")
-      localStorage.setItem(
-        "adminUser",
-        JSON.stringify({
-          email: "admin@lagangilang.gov",
-          name: "Administrator",
-          role: "Super Admin",
-        }),
-      )
-      router.push("/admin/dashboard")
-    } else {
-      setError("Invalid admin credentials")
-    }
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
 
-    setIsLoading(false)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed')
+      }
+
+      // Store user data in localStorage
+      localStorage.setItem('adminLoggedIn', 'true')
+      localStorage.setItem('adminUser', JSON.stringify({
+        ...data.user,
+        name: `${data.user.firstName} ${data.user.lastName}`,
+      }))
+
+      // Redirect to dashboard
+      router.push('/admin/dashboard')
+    } catch (err: any) {
+      setError(err.message || 'Failed to login. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -55,6 +67,12 @@ export default function AdminLoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="email">Admin Email</Label>
               <Input
@@ -89,25 +107,29 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
-          <div className="mt-4 p-3 bg-muted rounded-md">
-            <p className="text-sm text-muted-foreground">
-              <strong>Demo Credentials:</strong>
-              <br />
-              Email: admin@lagangilang.gov
-              <br />
-              Password: admin123
-            </p>
+          <div className="mt-4 flex flex-col space-y-2 text-center text-sm">
+            <div className="flex items-center justify-center space-x-1">
+              <span className="text-muted-foreground">Need an admin account?</span>
+              <Button
+                variant="link"
+                className="p-0 h-auto font-semibold"
+                onClick={() => router.push("/admin/register")}
+              >
+                Register here
+              </Button>
+            </div>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-muted-foreground hover:text-primary"
+              onClick={() => router.push("/admin/forgot-password")}
+            >
+              Forgot password?
+            </Button>
           </div>
         </CardContent>
       </Card>

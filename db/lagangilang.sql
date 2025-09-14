@@ -18,7 +18,13 @@ CREATE TABLE IF NOT EXISTS public.users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- Add check constraint for role to limit it to 'admin' and 'user' only
+ALTER TABLE public.users 
+DROP CONSTRAINT IF EXISTS users_role_check;
 
+ALTER TABLE public.users 
+ADD CONSTRAINT users_role_check 
+CHECK (role IN ('admin', 'user'));
 -- Trigger to auto-update updated_at
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS TRIGGER AS $$
